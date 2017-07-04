@@ -7,12 +7,6 @@ extern int Get_ArcTan( int x, int y );
 
 extern void Stage_1_a();
 extern void Stage_1_b();
-extern void Stage_2_a();
-extern void Stage_2_b();
-extern void Stage_3_a();
-extern void Stage_3_b();
-extern void Stage_4_a();
-extern void Stage_4_b();
 
 void Stage_Init();
 void Player_Init( int flag );
@@ -140,11 +134,8 @@ void Game_Init()
 	pl.type = 0;
 	gameover = pause = FALSE;
 	score = pastscore = level = 0;
+	stage = 0;
 	bomb = 3;
-	if( stage >= 2 ) {
-		cont = 1;
-		level = 15;
-	}
 	
 	if( !chara )	{ pl.range = 20; }	// ウルトリィ
 	else			{ pl.range = 25; }	// カミュ
@@ -167,24 +158,6 @@ void Stage_Init()
 			break;
 		case 2:
 			BGM = ppack_findPackData( arc, "11.pmd" );
-			break;
-		case 3:
-			BGM = ppack_findPackData( arc, "15.pmd" );
-			break;
-		case 4:
-			BGM = ppack_findPackData( arc, "10.pmd" );
-			break;
-		case 5:
-			BGM = ppack_findPackData( arc, "17.pmd" );
-			break;
-		case 6:
-			BGM = ppack_findPackData( arc, "19.pmd" );
-			break;
-		case 7:
-			BGM = ppack_findPackData( arc, "22.pmd" );
-			break;
-		case 8:
-			BGM = ppack_findPackData( arc, "lastboss.pmd" );
 			break;
 	}
 	PlayMusic( BGM );
@@ -295,18 +268,6 @@ void Game_Main()
 					Stage_1_a();	break;
 				case 2:
 					Stage_1_b();	break;
-				case 3:
-					Stage_2_a();	break;
-				case 4:
-					Stage_2_b();	break;
-				case 5:
-					Stage_3_a();	break;
-				case 6:
-					Stage_3_b();	break;
-				case 7:
-					Stage_4_a();	break;
-				case 8:
-					Stage_4_b();	break;
 			}
 			
 			Player_Action();
@@ -1202,7 +1163,6 @@ void Game_Graphics()
 	
 	// レベルゲージ
 	if( gameover )       { dlevel = 0; }
-	if( level == 0     ) { dlevel = 0; }
 	if( dlevel < level ) { dlevel++;   }
 	if( dlevel > level ) { dlevel--;   }
 	pceLCDPaint( 1, 14, 4, dlevel, 3 );

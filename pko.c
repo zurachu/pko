@@ -8,8 +8,6 @@
 
 void Title_Init();
 void Title_Free();
-void Ending_Init();
-void Ending_Free();
 void Logo( int cnt );
 void Title();
 void HiScore( int flag );
@@ -17,7 +15,6 @@ void Character_Select();
 void Draw_FireBackGround( int flag );
 void Hiscore_Init();
 void Hiscore_Update();
-void Ending();
 
 extern void Graphic_Free();
 extern void Game_Init();
@@ -76,9 +73,9 @@ void pceAppInit( void )
 
 	pceFileFindOpen( &pfi );	// ファイル検索
 	while( pceFileFindNext( &pfi ) ) {
-		if( !strcmp( "pko.dat", pfi.filename ) ) {
+		if( !strcmp( "pkotrial.dat", pfi.filename ) ) {
 			arc = pceHeapAlloc( pfi.length );
-			pceFileOpen( &pfa, "pko.dat", FOMD_RD );
+			pceFileOpen( &pfa, "pkotrial.dat", FOMD_RD );
 			while( pceFileReadSct( &pfa, arc+i*4096, i, 4096 ) ) { i++; }
 			pceFileClose( &pfa );
 			break;
@@ -136,20 +133,13 @@ void pceAppProc( int cnt )
 					break;
 				case GM_MAIN:
 					stage++;
-					if( stage == 9 ) {
+					if( stage == 3 ) {
 						Graphic_Free();
-						Ending_Init();
-						GameMode = GM_ENDING | GM_INIT;
-						Ending();
+						Title_Init();
+						Hiscore_Update();
 						break;
 					}
 					Stage_Init();
-					break;
-				case GM_HISCORE2:
-					Graphic_Free();
-					Ending_Free();
-					Title_Init();
-					Hiscore_Update();
 					break;
 			}
 		}
@@ -171,9 +161,6 @@ void pceAppProc( int cnt )
 			case GM_CHARASEL:
 				Character_Select();
 				break;
-			case GM_ENDING:
-				Ending();
-				break;
 			case GM_MAIN:
 				Game_Main();
 				break;
@@ -185,8 +172,10 @@ void pceAppProc( int cnt )
 					pceFontSetType( 0 );
 					pceFontSetTxColor( 3 );
 					pceFontSetBkColor( FC_SPRITE );
-					pceFontSetPos( 7, 39 );
-					pceFontPutStr( "pko.datが見つかりません" );
+					pceFontSetPos( 29, 34 );
+					pceFontPutStr( "pkotrial.datが" );
+					pceFontSetPos( 29, 44 );
+					pceFontPutStr( "見つかりません" );
 				}
 				if( pcePadGet() & ( TRG_A | TRG_B | TRG_C | TRG_D ) ) {
 					pceAppReqExit( 0 );
@@ -208,7 +197,6 @@ void pceAppExit( void )
 {
 	Graphic_Free();
 	Title_Free();
-	Ending_Free();
 	App_Exit();	// 終了時処理
 }
 
@@ -223,7 +211,6 @@ void Title_Init()
 	CHARASEL = ppack_findPackData( arc, "charasel.pgd" );
 	SHADOW = ppack_findPackData( arc, "shadow.pgd" );
 	BGM = ppack_findPackData( arc, "02.pmd" );
-	stage = 0;
 }
 
 
@@ -239,32 +226,6 @@ void Title_Free()
 	pceHeapFree( TITLE );
 	pceHeapFree( CHARASEL );
 	pceHeapFree( SHADOW );
-	pceHeapFree( BGM );
-}
-
-
-//=============================================================================
-//  
-//=============================================================================
-void Ending_Init()
-{
-	CHARASEL = ppack_findPackData( arc, "charasel.pgd" );
-	if( !chara ) { BOMB = ppack_findPackData( arc, "uruto.pgd" ); }
-	else		 { BOMB = ppack_findPackData( arc, "kamyu.pgd" ); }
-	BGM = ppack_findPackData( arc, "ending.pmd" );
-}
-
-
-//=============================================================================
-//  
-//=============================================================================
-void Ending_Free()
-{
-	StopMusic();
-	pceWaveAbort( 0 );
-
-	pceHeapFree( CHARASEL );
-	pceHeapFree( BOMB );
 	pceHeapFree( BGM );
 }
 
@@ -299,27 +260,13 @@ void Title()
 	static int cursor = 0;
 	int pad = pcePadGet();
 
-	if( cursor == 0 && pad & TRG_LF ) {
-		stage -= 2;
-		if( stage < 0 ) { stage = 6; }
-		LCDUpdate = TRUE;
-		pceWaveDataOut( 3, &IG );
-	}
-	if( cursor == 0 && pad & TRG_RI ) {
-		stage += 2;
-		if( stage > 6 ) { stage = 0; }
-		LCDUpdate = TRUE;
-		pceWaveDataOut( 3, &IG );
-	}
 	if( pad & TRG_UP ) {
-		stage = 0;
 		cursor--;
 		if( cursor < 0 ) { cursor = 2; }
 		LCDUpdate = TRUE;
 		pceWaveDataOut( 3, &IG );
 	}
 	if( pad & TRG_DN ) {
-		stage = 0;
 		cursor++;
 		if( cursor > 2 ) { cursor = 0; }
 		LCDUpdate = TRUE;
@@ -348,13 +295,7 @@ void Title()
 		Draw_Object( &BMP, 10, 10, 0, 0, 108, 33, DRW_NOMAL );
 		
 		pceFontSetType( 0 );
-		if( cursor == 0 ) { wFontPrintf( 0, 29, 50, "←　　　　　→" ); }
-		switch( stage / 2 ) {
-			case 0:	wFontPrintf( 1, 49, 50, "開　始" );	break;
-			case 1:	wFontPrintf( 1, 59, 50, "弐" );	break;
-			case 2:	wFontPrintf( 1, 59, 50, "参" );	break;
-			case 3:	wFontPrintf( 1, 59, 50, "四" );	break;
-		}
+		wFontPrintf( 1, 49, 50, "開　始" );
 		wFontPrintf( 1, 49, 62, "戦　歴" );
 		wFontPrintf( 1, 49, 74, "終　了" );
 		hanToumei( 5, 44, cursor*12+49, 41, 11 );
@@ -507,145 +448,4 @@ void Hiscore_Update()
 	GameMode = GM_HISCORE2 | GM_INIT;
 }
 
-
-//=============================================================================
-//  エンディング
-//=============================================================================
-void Ending()
-{
-	static int count = 0;
-	
-	int i;
-	
-	if( GameMode & GM_INIT ) {
-		count = 0;
-		pceFontSetType( 0 );
-		pceFontSetBkColor( FC_SPRITE );
-		Get_PieceBmp( &BMP, CHARASEL );
-		PlayMusic( BGM );
-	}
-
-	count++;
-
-	if( count < 440 ) {
-		pceLCDPaint( 3, 0, 0, 128, 88 );
-		if( !chara ) {
-			pceLCDPaint( 0, 0, 0, 80, 88 );
-			Draw_Object( &BMP, 0, 0, 0, 0, 80, 88, DRW_NOMAL );
-		}
-		else {
-			pceLCDPaint( 0, 48, 0, 80, 88 );
-			Draw_Object( &BMP, 48, 0, 80, 0, 80, 88, DRW_NOMAL );
-		}
-	}
-	
-	if( count >= 30 && count < 130 ) {
-		wFontPrintf( 0, 29, 88+30-count, "『Ｐ・Ｋ・Ｏ』" );
-		LCDUpdate = TRUE;
-	}
-	if( count >= 45 && count < 145 ) {
-		wFontPrintf( 0, 22, 88+45-count, "Development Staff" );
-		LCDUpdate = TRUE;
-	}
-	if( count >= 100 && count < 200 ) {
-		wFontPrintf( 0, 47, 88+100-count, "Program" );
-		LCDUpdate = TRUE;
-	}
-	if( count >= 110 && count < 210 ) {
-		wFontPrintf( 0, 34, 88+110-count, "Stage Design" );
-		LCDUpdate = TRUE;
-	}
-	if( count >= 120 && count < 220 ) {
-		wFontPrintf( 0, 34, 88+120-count, "Game Graphic" );
-		LCDUpdate = TRUE;
-	}
-	if( count >= 135 && count < 235 ) {
-		wFontPrintf( 0, 39, 88+135-count, "ヅラＣｈｕ" );
-		LCDUpdate = TRUE;
-	}
-	if( count >= 190 && count < 290 ) {
-		wFontPrintf( 0, 22, 88+190-count, "Character Graphic" );
-		LCDUpdate = TRUE;
-	}
-	if( count >= 205 && count < 305 ) {
-		wFontPrintf( 0, 49, 88+205-count, "KARASU" );
-		LCDUpdate = TRUE;
-	}
-	if( count >= 260 && count < 360 ) {
-		wFontPrintf( 0, 39, 88+260-count, "Game Music" );
-		LCDUpdate = TRUE;
-	}
-	if( count >= 275 && count < 375 ) {
-		wFontPrintf( 0, 57, 88+275-count, "MKT" );
-		LCDUpdate = TRUE;
-	}
-	if( count >= 295 && count < 395 ) {
-		wFontPrintf( 0, 32, 88+295-count, "Arranged from" );
-		LCDUpdate = TRUE;
-	}
-	if( count >= 310 && count < 410 ) {
-		wFontPrintf( 0, 24, 88+310-count, "(c)Leaf/AQUAPLUS" );
-		LCDUpdate = TRUE;
-	}
-	if( count == 410 ) { LCDUpdate = TRUE; }
-
-	if( count == 440 || count == 460 || count == 480 ) {
-		hanToumeiAll( 4 );
-		LCDUpdate = TRUE;
-	}
-
-	if( count >= 500 && count < 961 ) {
-		pceLCDPaint( 3, 0, 0, 128, 88 );
-		i = 88 - ( count - 500 )/2;
-		if( i < 4 ) { i = 4; }
-		Get_PieceBmp( &BMP, BOMB );
-		Draw_Object( &BMP, 0, i, 0, 0, 128, 64, DRW_NOMAL );
-		LCDUpdate = TRUE;
-	}
-	if( count >= 700 && count < 800 ) {
-		wFontPrintf( 0, 29, 88+700-count, "Special Thanks" );
-		LCDUpdate = TRUE;
-	}
-	if( count >= 715 && count < 815 ) {
-		wFontPrintf( 0, 52, 88+715-count, "ryong" );
-		LCDUpdate = TRUE;
-	}
-	if( count >= 730 && count < 830 ) {
-		wFontPrintf( 0, 42, 88+730-count, "Iwasaki++" );
-		LCDUpdate = TRUE;
-	}
-	if( count >= 745 && count < 845 ) {
-		wFontPrintf( 0, 42, 88+745-count, "Randomist" );
-		LCDUpdate = TRUE;
-	}
-	if( count >= 760 && count < 860 ) {
-		wFontPrintf( 0, 32, 88+760-count, "Leaf/AQUAPLUS" );
-		LCDUpdate = TRUE;
-	}
-
-
-	if( count >= 815 && count < 915 ) {
-		wFontPrintf( 0, 44, 88+815-count, "(c) 2003" );
-		LCDUpdate = TRUE;
-	}
-	if( count >= 830 && count < 930 ) {
-		wFontPrintf( 0, 29, 88+830-count, "てとら★ぽっと" );
-		LCDUpdate = TRUE;
-	}
-	if( count >= 845 && count < 945 ) {
-		wFontPrintf( 0, 44, 88+845-count, "Presents" );
-		LCDUpdate = TRUE;
-	}
-	
-	if( count >= 945 && count < 961 ) {
-		wFontPrintf( 0, 12, 88+945-count, "Thank you for Playing" );
-		LCDUpdate = TRUE;
-	}
-
-	if( count > 1500 || pcePadGet() & PAD_C ) {
-		GameMode = GM_HISCORE2;
-		FadeOut = 50;
-	}
-
-}
 

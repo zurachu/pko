@@ -24,16 +24,13 @@ LDFLAGS = -ls -lm
 
 # 構成ファイル・生成ファイルのマクロ
 
-PRGNAME = pko
-FILENAME = pko
-CAPTION = Ｐ・Ｋ・Ｏ
-ICON = uruto.pid
+PRGNAME = pkotrial
+FILENAME = pkotrial
+CAPTION = Ｐ・Ｋ・Ｏ体験版
+ICON = kamyu.pid
 OBJS =	pko.o\
 		main.o\
 		stage1.o\
-		stage2.o\
-		stage3.o\
-		stage4.o\
 		gamelib.o\
 		triangle.o\
 		htomei2.o\
