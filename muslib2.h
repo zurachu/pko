@@ -1,4 +1,4 @@
 #include <muslib.h>
 
-// drum.binまたはdrum.arcがあれば0、なければ1を返す
+// 音色データファイルの読み込みに成功すれば0、失敗すれば1を返す
 int loadInst(void);
