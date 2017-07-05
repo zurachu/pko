@@ -1,0 +1,46 @@
+MIT License
+
+Copyright (c) 2017 zurachu
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+私作成以外のコードについては、以下の通りです。
+--------------------------------------------------------------------------------
+filepack.h, filepack.c
+AQUAPLUS の「付属ソースを元にしたプログラムの再配布の扱いについて」に従います。
+https://aquaplus.jp/piece/intr.html
+原本の著作権表示は以下の通りです。
+> Copyright      :  AQUA (Leaf)  since 2001 - 
+>                   Programd by.  Miyakusa Masakazu
+
+inflate.h, inflate.c, piecezl.h
+AQUAPLUS の「付属ソースを元にしたプログラムの再配布の扱いについて」に従います。
+（inflate.c はパブリックドメイン扱い）
+原本の著作権表示は以下の通りです。
+> Copyright (C)2001 AQUAPLUS Co., Ltd. / OeRSTED, Inc. 
+> all rights reserved.
+> Coded by MIO.H (OeRSTED)
+
+muslib2.h, instdef2.c, drum.arc
+ドラム音色分離キット（Randomist氏）
+再配布については、以下のように記載されています。
+> アーカイブ内の各ファイルの改変、再配布などは自由に行なってください。
+
+myunpack.c
+P/ECE HAND BOOK Vol.2「緋色の霧」の zlib 展開ルーチンサンプルのコードを含みます。

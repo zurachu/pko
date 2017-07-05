@@ -92,48 +92,73 @@ static BOOL readFile(char *fileName, void *buffer){
   }
 }
 
+// ファイルから1バイト読む
+static int getNextByte(FILEACC *facc){
+  static int offset = 0;
+
+  if(offset < facc->fsize){
+    if(offset % SECTOR_SIZE == 0){
+      pceFileReadSct(facc, NULL, offset / SECTOR_SIZE, 0);
+    }
+
+    return facc->aptr[offset++ % SECTOR_SIZE];
+  }
+  else{
+    return -1;
+  }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 #define CHAR_SIZE 0x100
 #define NODE_SIZE (2 * CHAR_SIZE + 2)
 
+// ハフマン符号のノード
 typedef struct {
-  int count;	// 子ノードの出現頻度の和
-  int parent;	// 親ノードへ
-  int left;	// 左側の子ノードへ
-  int right;	// 右側の子ノードへ
+  unsigned short count;		// 子ノードの出現頻度の和
+  unsigned short parent;	// 親ノードへ
+  unsigned short left;		// 左側の子ノードへ
+  unsigned short right;		// 右側の子ノードへ
 } NODE;
 
 // データの展開
-static BOOL decode(unsigned char *inputBuffer, int inputSize,
-                   unsigned char *outputBuffer, int outputSize){
+static BOOL decode(char *inputFileName, unsigned char *outputBuffer, int outputSize){
+  FILEACC facc;
   NODE *node;
-  int i, k, c, len, min1, min2, freeNode, root, parent, previous;
-  static unsigned char bit1[8] = {128, 64, 32, 16, 8, 4, 2, 1};
+  int i, j, k, c, min1, min2, freeNode, root, parent, previous;
+  unsigned char bit1[8] = {128, 64, 32, 16, 8, 4, 2, 1};
 
-  if(inputSize <= 2 * CHAR_SIZE){
+  // ファイルの読み込み
+  if(pceFileOpen(&facc, inputFileName, FOMD_RD) == 1){
     return FALSE;
   }
 
   // ハフマン木用の領域を確保
-  node = (NODE *)pceHeapAlloc(NODE_SIZE * sizeof(NODE));
+  if((node = (NODE *)pceHeapAlloc(NODE_SIZE * sizeof(NODE))) == NULL){
+    return FALSE;
+  }
 
   // 各文字の出現頻度をセット
   for(i = 0; i < NODE_SIZE; i++){
     node[i].count = 0;
   }
   for(i = 0; i < CHAR_SIZE; i++){
-    node[i].count = 0x100 * *inputBuffer;
-    inputBuffer++;
-    node[i].count += *inputBuffer;
-    inputBuffer++;
+    if((c = getNextByte(&facc)) == -1){
+      return FALSE;
+    }
+    node[i].count = 0x100 * c;
+
+    if((c = getNextByte(&facc)) == -1){
+      return FALSE;
+    }
+    node[i].count += c;
   }
 
   // EOF
   node[CHAR_SIZE].count = 1;
 
   // 番兵
-  node[NODE_SIZE - 1].count = 0x10000;
+  node[NODE_SIZE - 1].count = 0xffff;
 
   // ハフマン木をつくる
   for(freeNode = CHAR_SIZE + 1; freeNode < NODE_SIZE - 1; freeNode++){
@@ -166,36 +191,40 @@ static BOOL decode(unsigned char *inputBuffer, int inputSize,
   }
   root = min1;
 
-  // 復号化
-  i = 0;
-  c = 2 * CHAR_SIZE;
+  j = 0;
   previous = 0;
-  for(len = 0; len < outputSize + 1; len++){
+
+  if((c = getNextByte(&facc)) == -1){
+    return FALSE;
+  }
+
+  // 復号化
+  for(i = 0; i < outputSize + 1; i++){
 
     // 符号語に対応する文字ノードを得る
     k = root;
     do{
       parent = k;
-      k = (*inputBuffer & bit1[i]) ? node[k].right : node[k].left;
+      k = (c & bit1[j]) ? node[k].right : node[k].left;
 
       // あり得ない
       if(k >= parent){
         return FALSE;
       }
 
-      i++;
-      if(i == 8){
-        i = 0;
-        inputBuffer++;
-        c++;
+      // 8ビット読んだら次のバイトへ
+      j++;
+      if(j == 8){
+        j = 0;
 
-        if(c > inputSize){
+        if((c = getNextByte(&facc)) == -1){
           return FALSE;
         }
       }
 
     }while (k > CHAR_SIZE);
 
+    // EOF
     if(k == CHAR_SIZE){
       break;
     }
@@ -216,32 +245,23 @@ static BOOL decode(unsigned char *inputBuffer, int inputSize,
 
 int loadInst(void){
   int result;
-  signed char *archiveBuffer, *p;
+  signed char *p;
 
-  // 圧縮音色データ用の領域を確保
-  archiveBuffer = (signed char *)pceHeapAlloc(ARCHIVE_FILE_SIZE);
-
-  result = 1;
-
-  // 圧縮音色データファイルがあれば読み込み
-  if(readFile(ARCHIVE_FILE_NAME, archiveBuffer)){
-    if(decode(archiveBuffer, ARCHIVE_FILE_SIZE, instBuffer, RAW_FILE_SIZE)){
-      result = 0;
-    }
-  }
-
-  // 音色データファイルがあれば読み込み
-  if((result == 1) && readFile(RAW_FILE_NAME, instBuffer)){
+  // 圧縮音色データファイルがあれば展開して読み込み
+  if(decode(ARCHIVE_FILE_NAME, instBuffer, RAW_FILE_SIZE)){
     result = 0;
   }
 
-  // 音色データファイルがなければ音色データを０で埋める
-  if(result == 1){
-    memset(instBuffer, 0, RAW_FILE_SIZE);
+  // 音色データファイルがあれば読み込み
+  else if(readFile(RAW_FILE_NAME, instBuffer)){
+    result = 0;
   }
 
-  // 圧縮音色データ用の領域を解放
-  pceHeapFree(archiveBuffer);
+  // 音色データファイルがなければ音色データを0で埋める
+  else{
+    memset(instBuffer, 0, RAW_FILE_SIZE);
+    result = 1;
+  }
 
   p = instBuffer;
   i_BD909.pData = p;
