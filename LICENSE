@@ -20,8 +20,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-私作成以外のコードについては、以下の通りです。
 --------------------------------------------------------------------------------
+私作成以外のコードについては、以下の通りです。
+
 filepack.h, filepack.c
 AQUAPLUS の「付属ソースを元にしたプログラムの再配布の扱いについて」に従います。
 https://aquaplus.jp/piece/intr.html
@@ -44,3 +45,11 @@ muslib2.h, instdef2.c, drum.arc
 
 myunpack.c
 P/ECE HAND BOOK Vol.2「緋色の霧」の zlib 展開ルーチンサンプルのコードを含みます。
+
+--------------------------------------------------------------------------------
+リソースについては、「うたわれるもの」（Leaf/AQUAPLUS）の二次創作であるため、
+AQUAPLUS の「当社製品を題材にした二次創作物の制作・頒布」に従います。
+http://aquaplus.jp/copyright/
+
+上記を守ったうえで、「P/ECE用ソフトウェアで使用される限り」は、
+自由に使っていただいてかまいません。
