@@ -38,6 +38,14 @@ AQUAPLUS の「付属ソースを元にしたプログラムの再配布の扱�
 > all rights reserved.
 > Coded by MIO.H (OeRSTED)
 
+htomei2.c, htomei2.h
+半透明(反転)関数（GENGE氏）
+http://www13.plala.or.jp/genge/
+> あらゆるデータにおいて、いかなる問題に関しても、
+> GENGEは一切責任を負いませんのでご了承下さい。
+> プログラムの一部拝借等はご自由に、、、
+> (必ず自己責任でお願いします。)
+
 muslib2.h, instdef2.c, drum.arc
 ドラム音色分離キット（Randomist氏）
 再配布については、以下のように記載されています。
